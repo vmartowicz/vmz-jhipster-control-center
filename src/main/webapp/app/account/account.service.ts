@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { Store } from 'vuex';
-import Router from 'vue-router';
+import VueRouter from 'vue-router';
 
 export default class AccountService {
-  constructor(private store: Store<any>, private cookie: any, private router: Router) {
+  constructor(private store: Store<any>, private cookie: any, private router: VueRouter) {
     this.init();
   }
 
@@ -68,17 +68,23 @@ export default class AccountService {
       if (!this.store.getters.account && !this.store.getters.logon && token) {
         return this.retrieveAccount();
       } else {
-        return Promise.resolve(false);
+        return new Promise(resolve => {
+          resolve(false);
+        });
       }
     }
 
-    for (const authority of authorities) {
-      if (this.userAuthorities.includes(authority)) {
-        return Promise.resolve(true);
+    for (let i = 0; i < authorities.length; i++) {
+      if (this.userAuthorities.includes(authorities[i])) {
+        return new Promise(resolve => {
+          resolve(true);
+        });
       }
     }
 
-    return Promise.resolve(false);
+    return new Promise(resolve => {
+      resolve(false);
+    });
   }
 
   public get authenticated(): boolean {

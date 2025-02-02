@@ -1,4 +1,4 @@
-/* after changing this file run 'npm run webpack:build' */
+/* after changing this file run 'npm run webapp:build' */
 
 /***************************
 put Sass variables here:
@@ -10,5 +10,9 @@ eg $input-color: red;
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap-vue/src/index.scss';
 @import '~bootswatch/dist/spacelab/bootswatch';
+/* Dirty fix on navbar active link with bootswatch theme */
+nav li.router-link-active .navbar-dropdown-menu {
+  color: $navbar-dark-active-color;
+}
 
 /* jhipster-needle-scss-add-vendor JHipster will add new css style */

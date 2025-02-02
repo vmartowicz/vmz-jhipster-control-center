@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.WebExceptionHandler;
@@ -85,5 +86,10 @@ public class WebConfigurer implements WebFluxConfigurer {
     public CachingHttpHeadersFilter cachingHttpHeadersFilter() {
         // Use a cache filter that only match selected paths
         return new CachingHttpHeadersFilter(TimeUnit.DAYS.toMillis(jHipsterProperties.getHttp().getCache().getTimeToLiveInDays()));
+    }
+
+    @Override
+    public void configurePathMatching(PathMatchConfigurer configurer) {
+        configurer.setUseTrailingSlashMatch(true);
     }
 }

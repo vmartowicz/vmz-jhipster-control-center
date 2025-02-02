@@ -19,38 +19,56 @@
 
 // Navbar
 export const navbarSelector = '[data-cy="navbar"]';
+export const adminMenuSelector = '[data-cy="adminMenu"]';
 export const accountMenuSelector = '[data-cy="accountMenu"]';
+export const registerItemSelector = '[data-cy="register"]';
+export const settingsItemSelector = '[data-cy="settings"]';
+export const passwordItemSelector = '[data-cy="passwordItem"]';
 export const loginItemSelector = '[data-cy="login"]';
 export const logoutItemSelector = '[data-cy="logout"]';
-
-// jhcc-custom begin
+export const entityItemSelector = '[data-cy="entity"]';
 
 // Login
 export const titleLoginSelector = '[data-cy="loginTitle"]';
 export const errorLoginSelector = '[data-cy="loginError"]';
 export const usernameLoginSelector = '[data-cy="username"]';
 export const passwordLoginSelector = '[data-cy="password"]';
+export const forgetYourPasswordSelector = '[data-cy="forgetYourPasswordSelector"]';
 export const submitLoginSelector = '[data-cy="submit"]';
 
-// Sidebar
-export const sidebarSelector = '[data-cy="sidebar"]';
-export const metricsMenuSelector = '[data-cy="metricsMenu"]';
-export const cachesMenuSelector = '[data-cy="cachesMenu"]';
-export const healthMenuSelector = '[data-cy="healthMenu"]';
-export const liquibaseMenuSelector = '[data-cy="liquibaseMenu"]';
-export const logsMenuSelector = '[data-cy="logsMenu"]';
-export const logsFileMenuSelector = '[data-cy="logsfileMenu"]';
-export const configurationMenuSelector = '[data-cy="configurationMenu"]';
-export const openAPIMenuSelector = '[data-cy="openAPIMenu"]';
+// Register
+export const titleRegisterSelector = '[data-cy="registerTitle"]';
+export const usernameRegisterSelector = '[data-cy="username"]';
+export const emailRegisterSelector = '[data-cy="email"]';
+export const firstPasswordRegisterSelector = '[data-cy="firstPassword"]';
+export const secondPasswordRegisterSelector = '[data-cy="secondPassword"]';
+export const submitRegisterSelector = '[data-cy="submit"]';
 
+// Settings
+export const firstNameSettingsSelector = '[data-cy="firstname"]';
+export const lastNameSettingsSelector = '[data-cy="lastname"]';
+export const emailSettingsSelector = '[data-cy="email"]';
+export const languageSettingsSelector = '[data-cy="langKey"]';
+export const submitSettingsSelector = '[data-cy="submit"]';
+
+// Password
+export const currentPasswordSelector = '[data-cy="currentPassword"]';
+export const newPasswordSelector = '[data-cy="newPassword"]';
+export const confirmPasswordSelector = '[data-cy="confirmPassword"]';
+export const submitPasswordSelector = '[data-cy="submit"]';
+
+// Reset Password
+export const emailResetPasswordSelector = '[data-cy="emailResetPassword"]';
+export const submitInitResetPasswordSelector = '[data-cy="submit"]';
+
+// Administration
+export const userManagementPageHeadingSelector = '[data-cy="userManagementPageHeading"]';
+export const swaggerFrameSelector = 'iframe[data-cy="swagger-frame"]';
+export const swaggerPageSelector = '[id="swagger-ui"]';
 export const metricsPageHeadingSelector = '[data-cy="metricsPageHeading"]';
-export const cachesPageHeadingSelector = '[data-cy="cachesPageHeading"]';
 export const healthPageHeadingSelector = '[data-cy="healthPageHeading"]';
-export const liquibasePageHeadingSelector = '[data-cy="liquibasePageHeading"]';
 export const logsPageHeadingSelector = '[data-cy="logsPageHeading"]';
-export const logsFilePageHeadingSelector = '[data-cy="logsfilePageHeading"]';
 export const configurationPageHeadingSelector = '[data-cy="configurationPageHeading"]';
-export const openAPIPageHeadingSelector = '[data-cy="openAPIPageHeading"]';
 
 // ***********************************************
 // End Specific Selector Attributes for Cypress
@@ -58,7 +76,6 @@ export const openAPIPageHeadingSelector = '[data-cy="openAPIPageHeading"]';
 
 export const classInvalid = 'invalid';
 export const classValid = 'valid';
-
 Cypress.Commands.add('login', (username: string, password: string) => {
   cy.clickOnLoginItem();
   cy.get(usernameLoginSelector).type(username);
@@ -66,27 +83,13 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   cy.get(submitLoginSelector).click();
 });
 
-Cypress.Commands.add('getProfiles', () => {
-  cy.window().its('app.$store.getters.activeProfiles');
-});
-
-Cypress.Commands.add('skipSpec', () => {
-  const getMochaContext = () => (cy as any).state('runnable').ctx;
-  const context = getMochaContext();
-  context.skip();
-});
-
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       login(username: string, password: string): Cypress.Chainable;
-      getProfiles(): Cypress.Chainable;
-      skipSpec(): Cypress.Chainable;
     }
   }
 }
 
 // Convert this to a module instead of script (allows import/export)
 export {};
-
-// jhcc-custom end

@@ -36,6 +36,8 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons/faTimes';
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash';
 import { faUser } from '@fortawesome/free-solid-svg-icons/faUser';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons/faUserPlus';
+import { faUsers } from '@fortawesome/free-solid-svg-icons/faUsers';
+import { faUsersCog } from '@fortawesome/free-solid-svg-icons/faUsersCog';
 import { faWrench } from '@fortawesome/free-solid-svg-icons/faWrench';
 // jhcc-custom begin
 import { faSitemap } from '@fortawesome/free-solid-svg-icons/faSitemap';
@@ -104,6 +106,8 @@ export function initFortAwesome(vue) {
     faTrash,
     faUser,
     faUserPlus,
+    faUsers,
+    faUsersCog,
     faWrench,
     // jhcc-custom begin
     faAngleDoubleLeft,

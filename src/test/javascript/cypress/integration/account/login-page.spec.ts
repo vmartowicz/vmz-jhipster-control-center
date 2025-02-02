@@ -6,27 +6,16 @@ import {
   submitLoginSelector,
 } from '../../support/commands';
 
-// jhcc-custom begin
-
 describe('login modal', () => {
   before(() => {
-    cy.visit('');
-    cy.getProfiles().then((activeProfiles: Array<string>) => {
-      if (activeProfiles.includes('oauth2')) {
-        cy.skipSpec();
-      } else {
-        cy.window().then(win => {
-          win.sessionStorage.clear();
-        });
-
-        cy.clearCookies();
-        cy.visit('');
-        cy.clickOnLoginItem();
-      }
+    cy.window().then(win => {
+      win.sessionStorage.clear();
     });
-  });
 
-  // jhcc-custom end
+    cy.clearCookies();
+    cy.visit('');
+    cy.clickOnLoginItem();
+  });
 
   beforeEach(() => {
     cy.intercept('POST', '/api/authenticate').as('authenticate');

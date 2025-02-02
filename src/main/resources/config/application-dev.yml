@@ -51,6 +51,7 @@ server:
 jhipster:
   # CORS is only enabled by default with the "dev" profile
   cors:
+    # Allow Ionic for JHipster by default (* no longer allowed in Spring Boot 2.4+)
     allowed-origins: '*'
     allowed-methods: '*'
     allowed-headers: '*'

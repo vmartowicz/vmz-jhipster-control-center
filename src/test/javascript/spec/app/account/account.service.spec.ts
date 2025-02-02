@@ -3,7 +3,6 @@ import router from '@/router';
 import axios from 'axios';
 import sinon from 'sinon';
 
-// jhcc-custom
 import AccountService from '@/account/account.service';
 
 import * as config from '@/shared/config/config';
@@ -11,13 +10,6 @@ import * as config from '@/shared/config/config';
 const axiosStub = {
   get: sinon.stub(axios, 'get'),
   post: sinon.stub(axios, 'post'),
-};
-
-// jhcc-custom
-const mockedCookie = {
-  get: jest.fn(() => {
-    return 'token';
-  }),
 };
 
 const localVue = createLocalVue();
@@ -35,7 +27,7 @@ describe('Account Service test suite', () => {
   it('should init service and do not retrieve account', async () => {
     axiosStub.get.resolves({ data: { 'display-ribbon-on-profiles': 'dev', activeProfiles: ['dev', 'test'] } });
 
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     expect(store.getters.logon).toBe(false);
     expect(accountService.authenticated).toBe(false);
@@ -50,7 +42,7 @@ describe('Account Service test suite', () => {
     localStorage.setItem('jhi-authenticationToken', 'token');
 
     axiosStub.get.resolves({});
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     expect((<any>router).history.current.fullPath).toBe('/');
     expect(store.getters.logon).toBe(false);
@@ -64,7 +56,7 @@ describe('Account Service test suite', () => {
 
     axiosStub.get.resolves({});
     axiosStub.get.withArgs('api/account').rejects();
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     expect((<any>router).history.current.fullPath).toBe('/');
     expect(accountService.authenticated).toBe(false);
@@ -76,7 +68,7 @@ describe('Account Service test suite', () => {
     localStorage.setItem('jhi-authenticationToken', 'token');
 
     axiosStub.get.rejects();
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     return accountService.hasAnyAuthorityAndCheckAuth('USER').then((value: boolean) => {
       expect(value).toBe(false);
@@ -87,7 +79,7 @@ describe('Account Service test suite', () => {
     localStorage.setItem('jhi-authenticationToken', 'token');
 
     axiosStub.get.resolves({ data: { authorities: ['USER'] } });
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     return accountService.hasAnyAuthorityAndCheckAuth('USER').then((value: boolean) => {
       expect(value).toBe(true);
@@ -97,7 +89,7 @@ describe('Account Service test suite', () => {
   it('should init service as not authentified and not return any authorities admin and not retrieve account', async () => {
     axiosStub.get.resolves({});
     axiosStub.get.withArgs('api/account').rejects();
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     return accountService.hasAnyAuthorityAndCheckAuth('ADMIN').then((value: boolean) => {
       expect(value).toBe(false);
@@ -107,7 +99,7 @@ describe('Account Service test suite', () => {
   it('should init service as not authentified and return authority user', async () => {
     axiosStub.get.resolves({});
     axiosStub.get.withArgs('api/account').rejects();
-    accountService = await new AccountService(store, mockedCookie, router);
+    accountService = await new AccountService(store, router);
 
     return accountService.hasAnyAuthorityAndCheckAuth('USER').then((value: boolean) => {
       expect(value).toBe(true);

@@ -1,5 +1,5 @@
 // ***********************************************************
-// This support/index.ts is processed and
+// This support/index.js is processed and
 // loaded automatically before your test files.
 //
 // This is a great place to put global configuration and
@@ -15,5 +15,5 @@
 
 import './commands';
 import './navbar';
-import './sidebar';
-import './keycloak-oauth2';
+import './entity';
+import './management';
