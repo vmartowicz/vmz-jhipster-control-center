@@ -39,7 +39,7 @@ spring:
     scheduling:
       thread-name-prefix: jhipster-control-center-scheduling-
       pool:
-        size: 1
+        size: 20
   thymeleaf:
     mode: HTML
 
@@ -52,10 +52,12 @@ server:
 #
 # Full reference is available at: https://www.jhipster.tech/common-application-properties/
 # ===================================================================
-
 jhipster:
   clientApp:
     name: 'jhipsterControlCenterApp'
+  mail:
+    from: jhipsterControlCenter@localhost.com
+    base-url: http://127.0.0.1:8080
   logging:
     # To test json console appender
     use-json-format: false
@@ -71,6 +73,7 @@ jhipster:
         base64-secret: MDc2YTJkMGVmMTc3ZjQ3MjgwNjVkMDRhYmE1MThmZmNlZGMyMjgzNjgxMTMyZGY3MzlhOTA1Mjk1NzUwODgyOTZhODM1ZTYyZmI5YmJjZWVkNjVhZWM5NDgzMzU2OWZkYzUzNjVkYTNiMTIxZTlhMWRkYjJhMTg2ZWJmMzgxMjQ=
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
+
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
@@ -81,3 +84,7 @@ jhipster:
 # ===================================================================
 
 # application:
+management:
+  health:
+    mail:
+      enabled: false

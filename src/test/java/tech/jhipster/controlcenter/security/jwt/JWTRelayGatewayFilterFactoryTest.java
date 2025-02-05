@@ -8,6 +8,9 @@ import static org.mockito.Mockito.when;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.util.Collections;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,10 +25,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import tech.jhipster.config.JHipsterProperties;
+import tech.jhipster.controlcenter.management.SecurityMetersService;
 import tech.jhipster.controlcenter.security.AuthoritiesConstants;
 
 class JWTRelayGatewayFilterFactoryTest {
 
+    private MeterRegistry meterRegistry;
     private final TokenProvider tokenProvider;
     private final GatewayFilterChain filterChain = mock(GatewayFilterChain.class);
     private final ArgumentCaptor<ServerWebExchange> captor = ArgumentCaptor.forClass(ServerWebExchange.class);
@@ -35,7 +40,9 @@ class JWTRelayGatewayFilterFactoryTest {
         String base64Secret = "fd54a45s65fds737b9aafcb3412e07ed99b267f33413274720ddbb7f6c5e64e9f14075f2d7ed041592f0b7657baf8";
         JHipsterProperties jHipsterProperties = new JHipsterProperties();
         jHipsterProperties.getSecurity().getAuthentication().getJwt().setBase64Secret(base64Secret);
-        tokenProvider = new TokenProvider(jHipsterProperties);
+        meterRegistry = new SimpleMeterRegistry();
+        SecurityMetersService securityMetersService = new SecurityMetersService(meterRegistry);
+        tokenProvider = new TokenProvider(jHipsterProperties, securityMetersService);
         ReflectionTestUtils.setField(tokenProvider, "key", Keys.hmacShaKeyFor(Decoders.BASE64.decode(base64Secret)));
 
         ReflectionTestUtils.setField(tokenProvider, "tokenValidityInMilliseconds", 60000);

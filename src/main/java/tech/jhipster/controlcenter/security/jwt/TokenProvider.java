@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import tech.jhipster.config.JHipsterProperties;
+import tech.jhipster.controlcenter.management.SecurityMetersService;
 
 @Component
 public class TokenProvider {
@@ -25,6 +27,8 @@ public class TokenProvider {
     private final Logger log = LoggerFactory.getLogger(TokenProvider.class);
 
     private static final String AUTHORITIES_KEY = "auth";
+
+    private static final String INVALID_JWT_TOKEN = "Invalid JWT token.";
 
     private final Key key;
 
@@ -34,24 +38,29 @@ public class TokenProvider {
 
     private final long tokenValidityInMillisecondsForRememberMe;
 
-    public TokenProvider(JHipsterProperties jHipsterProperties) {
+    private final SecurityMetersService securityMetersService;
+
+    public TokenProvider(JHipsterProperties jHipsterProperties, SecurityMetersService securityMetersService) {
         byte[] keyBytes;
-        String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getSecret();
+        String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret();
         if (!ObjectUtils.isEmpty(secret)) {
+            log.debug("Using a Base64-encoded JWT secret key");
+            keyBytes = Decoders.BASE64.decode(secret);
+        } else {
             log.warn(
                 "Warning: the JWT key used is not Base64-encoded. " +
                 "We recommend using the `jhipster.security.authentication.jwt.base64-secret` key for optimum security."
             );
+            secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getSecret();
             keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        } else {
-            log.debug("Using a Base64-encoded JWT secret key");
-            keyBytes = Decoders.BASE64.decode(jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret());
         }
         key = Keys.hmacShaKeyFor(keyBytes);
         jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
         this.tokenValidityInMilliseconds = 1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds();
         this.tokenValidityInMillisecondsForRememberMe =
             1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSecondsForRememberMe();
+
+        this.securityMetersService = securityMetersService;
     }
 
     public String createToken(Authentication authentication, boolean rememberMe) {
@@ -71,7 +80,7 @@ public class TokenProvider {
             .claim(AUTHORITIES_KEY, authorities)
             .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(validity)
-            .serializeToJsonWith(new JacksonSerializer())
+            .serializeToJsonWith(new JacksonSerializer<>())
             .compact();
     }
 
@@ -92,11 +101,28 @@ public class TokenProvider {
     public boolean validateToken(String authToken) {
         try {
             jwtParser.parseClaimsJws(authToken);
+
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.info("Invalid JWT token.");
-            log.trace("Invalid JWT token trace.", e);
+        } catch (ExpiredJwtException e) {
+            this.securityMetersService.trackTokenExpired();
+
+            log.trace(INVALID_JWT_TOKEN, e);
+        } catch (UnsupportedJwtException e) {
+            this.securityMetersService.trackTokenUnsupported();
+
+            log.trace(INVALID_JWT_TOKEN, e);
+        } catch (MalformedJwtException e) {
+            this.securityMetersService.trackTokenMalformed();
+
+            log.trace(INVALID_JWT_TOKEN, e);
+        } catch (SignatureException e) {
+            this.securityMetersService.trackTokenInvalidSignature();
+
+            log.trace(INVALID_JWT_TOKEN, e);
+        } catch (IllegalArgumentException e) { // TODO: should we let it bubble (no catch), to avoid defensive programming and follow the fail-fast principle?
+            log.error("Token validation error {}", e.getMessage());
         }
+
         return false;
     }
 }

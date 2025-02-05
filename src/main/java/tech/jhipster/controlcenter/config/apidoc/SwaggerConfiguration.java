@@ -1,26 +1,28 @@
 package tech.jhipster.controlcenter.config.apidoc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import org.springdoc.core.AbstractSwaggerUiConfigProperties.SwaggerUrl;
+import org.springdoc.core.SwaggerUiConfigProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.route.Route;
+import org.springframework.cloud.gateway.route.RouteDefinition;
+import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.cloud.gateway.route.RouteLocator;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
-import springfox.documentation.oas.annotations.EnableOpenApi;
-import springfox.documentation.swagger.web.SwaggerResource;
-import springfox.documentation.swagger.web.SwaggerResourcesProvider;
+//import springfox.documentation.oas.annotations.EnableOpenApi;
+//import springfox.documentation.swagger.web.SwaggerResource;
+//import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 import tech.jhipster.config.JHipsterConstants;
+import static org.springdoc.core.Constants.DEFAULT_API_DOCS_URL;
 
 /**
  * jhcc-custom
@@ -30,11 +32,37 @@ import tech.jhipster.config.JHipsterConstants;
 @Primary
 @Profile(JHipsterConstants.SPRING_PROFILE_API_DOCS)
 @Configuration
-@EnableOpenApi
-public class SwaggerConfiguration implements SwaggerResourcesProvider {
+//@EnableOpenApi
+@OpenAPIDefinition
+public class SwaggerConfiguration /*implements SwaggerResourcesProvider*/ {
 
     private final RouteLocator routeLocator;
 
+    public SwaggerConfiguration(RouteLocator routeLocator) {
+        this.routeLocator = routeLocator;
+    }
+
+    @Bean
+    @Lazy(false)
+    public Set<SwaggerUrl> apis(RouteDefinitionLocator locator/*, SwaggerUiConfigProperties swaggerUiConfigProperties*/) {
+
+        Set<SwaggerUrl> urls = new HashSet<>();
+        List<RouteDefinition> definitions = locator.getRouteDefinitions().collectList().block();
+        definitions
+            .stream()
+            //.filter(routeDefinition -> routeDefinition.getId().matches(".*-service"))
+            .forEach(routeDefinition -> {
+                String service = routeDefinition.getId().split("/")[0];
+                SwaggerUrl swaggerDefaultUrl = new SwaggerUrl(service + " (default)", "/gateway/" + service + DEFAULT_API_DOCS_URL + "/springdocDefault", null);
+                SwaggerUrl swaggerManagementUrl = new SwaggerUrl(service + " (management)", "/gateway/" + service + DEFAULT_API_DOCS_URL + "/management", null);
+                urls.addAll(List.of(swaggerDefaultUrl, swaggerManagementUrl));
+            });
+        //swaggerUiConfigProperties.setUrls(urls);
+        return urls;
+    }
+
+
+/*
     @Qualifier("swaggerResources")
     private final SwaggerResourcesProvider controlCenterSwaggerResources;
 
@@ -107,5 +135,5 @@ public class SwaggerConfiguration implements SwaggerResourcesProvider {
 
         allSwaggerResources.addAll(servicesSwaggerResources);
         return allSwaggerResources;
-    }
+    }*/
 }

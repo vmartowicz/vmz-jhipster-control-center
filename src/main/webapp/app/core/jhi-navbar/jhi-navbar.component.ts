@@ -1,5 +1,4 @@
 import { Component, Inject, Vue } from 'vue-property-decorator';
-import { VERSION } from '@/constants';
 import LoginService from '@/account/login.service';
 import AccountService from '@/account/account.service';
 
@@ -9,10 +8,10 @@ export default class JhiNavbar extends Vue {
   private loginService: () => LoginService;
 
   @Inject('accountService') private accountService: () => AccountService;
-  public version = VERSION ? 'v' + VERSION : '';
+  public version = 'v' + VERSION;
   private currentLanguage = this.$store.getters.currentLanguage;
   private languages: any = this.$store.getters.languages;
-  private hasAnyAuthorityValue = false;
+  private hasAnyAuthorityValues = {};
 
   created() {}
 
@@ -23,10 +22,20 @@ export default class JhiNavbar extends Vue {
     });
   }
 
+  /*public logout_(): Promise<any> {
+    localStorage.removeItem('jhi-authenticationToken');
+    sessionStorage.removeItem('jhi-authenticationToken');
+    this.$store.commit('logout');
+    if (this.$route.path !== '/') {
+      return this.$router.push('/');
+    }
+    return Promise.resolve(this.$router.currentRoute);
+  }*/
+
   // jhcc-custom
-  public logout(): void {
+  public logout(): Promise<any> {
     if (this.$store.getters.activeProfiles.includes('oauth2')) {
-      this.loginService()
+      return this.loginService()
         .logout()
         .then(response => {
           this.$store.commit('logout');
@@ -46,7 +55,7 @@ export default class JhiNavbar extends Vue {
       localStorage.removeItem('jhi-authenticationToken');
       sessionStorage.removeItem('jhi-authenticationToken');
       this.$store.commit('logout');
-      this.$router.push('/', () => {});
+      return this.$router.push('/', () => {});
     }
   }
 
@@ -67,9 +76,11 @@ export default class JhiNavbar extends Vue {
     this.accountService()
       .hasAnyAuthorityAndCheckAuth(authorities)
       .then(value => {
-        this.hasAnyAuthorityValue = value;
+        if (this.hasAnyAuthorityValues[authorities] !== value) {
+          this.hasAnyAuthorityValues = { ...this.hasAnyAuthorityValues, [authorities]: value };
+        }
       });
-    return this.hasAnyAuthorityValue;
+    return this.hasAnyAuthorityValues[authorities] ?? false;
   }
 
   public get openAPIEnabled(): boolean {

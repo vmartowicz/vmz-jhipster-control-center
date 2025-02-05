@@ -11,7 +11,7 @@ import tech.jhipster.controlcenter.web.rest.vm.LoginVM;
 /**
  * Integration tests for the {@link UserJWTController} REST controller.
  */
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_TIMEOUT)
 @IntegrationTest
 class UserJWTControllerIT {
 

@@ -1,5 +1,6 @@
 package tech.jhipster.controlcenter.config;
 
+import static org.springframework.security.web.server.header.XFrameOptionsServerHttpHeadersWriter.Mode.*;
 import static org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers;
 
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -19,10 +20,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter;
+import org.springframework.security.web.server.header.XFrameOptionsServerHttpHeadersWriter;
 import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.util.StringUtils;
+import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport;
+import tech.jhipster.config.JHipsterProperties;
 import tech.jhipster.controlcenter.security.AuthoritiesConstants;
 import tech.jhipster.controlcenter.security.jwt.JWTFilter;
 import tech.jhipster.controlcenter.security.jwt.TokenProvider;
@@ -34,13 +38,21 @@ import tech.jhipster.controlcenter.web.filter.SpaWebFilter;
 @Profile("!" + Constants.PROFILE_OAUTH2)
 public class JwtSecurityConfiguration {
 
+    private final JHipsterProperties jHipsterProperties;
+
     private final TokenProvider tokenProvider;
 
     private final SecurityProblemSupport problemSupport;
+    private final CorsWebFilter corsWebFilter;
 
-    public JwtSecurityConfiguration(TokenProvider tokenProvider, SecurityProblemSupport problemSupport) {
+    public JwtSecurityConfiguration( TokenProvider tokenProvider,
+                                     JHipsterProperties jHipsterProperties,
+                                     SecurityProblemSupport problemSupport,
+                                     CorsWebFilter corsWebFilter) {
         this.tokenProvider = tokenProvider;
+        this.jHipsterProperties = jHipsterProperties;
         this.problemSupport = problemSupport;
+        this.corsWebFilter = corsWebFilter;
     }
 
     @Bean
@@ -64,12 +76,12 @@ public class JwtSecurityConfiguration {
         // @formatter:off
         http
             .securityMatcher(new NegatedServerWebExchangeMatcher(new OrServerWebExchangeMatcher(
-                pathMatchers("/app/**", "/i18n/**", "/content/**", "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/test/**"),
+                pathMatchers("/app/**", "/_app/**", "/i18n/**", "/img/**", "/content/**", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**", "/test/**"),
                 pathMatchers(HttpMethod.OPTIONS, "/**")
             )))
             .csrf()
                 .disable()
-
+            .addFilterBefore(corsWebFilter, SecurityWebFiltersOrder.REACTOR_CONTEXT)
             .addFilterAt(new SpaWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterAt(new JWTFilter(tokenProvider), SecurityWebFiltersOrder.HTTP_BASIC)
             .exceptionHandling()
@@ -77,13 +89,13 @@ public class JwtSecurityConfiguration {
                 .authenticationEntryPoint(problemSupport)
         .and()
             .headers()
-                .contentSecurityPolicy("default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com https://www.google-analytics.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com data:")
+            .contentSecurityPolicy(jHipsterProperties.getSecurity().getContentSecurityPolicy())
             .and()
                 .referrerPolicy(ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
             .and()
-                .featurePolicy("geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; fullscreen 'self'; payment 'none'")
+                .permissionsPolicy().policy("camera=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), sync-xhr=()")
             .and()
-                .frameOptions().disable()
+                .frameOptions().mode(DENY)
         .and()
             .authorizeExchange()
             .pathMatchers("/").permitAll()

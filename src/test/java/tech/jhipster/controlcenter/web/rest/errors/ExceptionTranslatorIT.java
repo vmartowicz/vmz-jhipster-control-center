@@ -14,7 +14,7 @@ import tech.jhipster.controlcenter.IntegrationTest;
  * Integration tests {@link ExceptionTranslator} controller advice.
  */
 @WithMockUser
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_TIMEOUT)
 @IntegrationTest
 class ExceptionTranslatorIT {
 

@@ -1,86 +1,35 @@
 'use strict';
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
-const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
-const portfinder = require('portfinder');
-const path = require('path');
 const webpack = require('webpack');
-const { merge: webpackMerge } = require('webpack-merge');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const utils = require('./vue.utils');
-const config = require('../config');
-const baseWebpackConfig = require('./webpack.common');
-const jhiUtils = require('./utils.js');
+const { styleLoaders } = require('./vue.utils');
+const config = require('./config');
 
-const HOST = process.env.HOST;
-const PORT = process.env.PORT && Number(process.env.PORT);
-
-module.exports = webpackMerge(baseWebpackConfig, {
-  mode: 'development',
-  module: {
-    rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true }),
-  },
-  // cheap-module-eval-source-map is faster for development
-  devtool: config.dev.devtool,
-  entry: {
-    global: './src/main/webapp/content/scss/global.scss',
-    main: './src/main/webapp/app/main',
-  },
-  output: {
-    path: jhiUtils.root('target/classes/static/'),
-    filename: 'app/[name].bundle.js',
-    chunkFilename: 'app/[id].chunk.js',
-  },
-  optimization: {
-    moduleIds: 'named',
-  },
-  devServer: {
-    contentBase: './target/classes/static/',
-    port: 9060,
-    proxy: [
-      {
-        context: [
-          '/api',
-          '/services',
-          '/management',
-          '/gateway',
-          '/swagger-resources',
-          '/v2/api-docs',
-          '/v3/api-docs',
-          '/h2-console',
-          '/oauth2',
-          '/login',
-          '/auth',
-        ],
-        target: 'http://127.0.0.1:7419',
-        secure: false,
-        headers: { host: 'localhost:9000' },
-      },
-    ],
-    watchOptions: {
-      ignored: /node_modules/,
+module.exports = (env, options) => {
+  const devConfig = {
+    module: {
+      rules: styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true }),
     },
-    historyApiFallback: true,
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': require('../config/dev.env'),
-    }),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new HtmlWebpackPlugin({
-      base: '/',
-      template: './src/main/webapp/index.html',
-      chunks: ['vendors', 'main', 'global'],
-      chunksSortMode: 'manual',
-      inject: true,
-    }),
+    // cheap-module-eval-source-map is faster for development
+    devtool: config.dev.devtool,
+    output: {
+      filename: 'app/[contenthash].bundle.js',
+      chunkFilename: 'app/[id].chunk.js',
+    },
+    optimization: {
+      moduleIds: 'named',
+    },
+    plugins: [],
+  };
+  if (!options.env.WEBPACK_SERVE) return devConfig;
+  devConfig.plugins.push(
     new BrowserSyncPlugin(
       {
         host: 'localhost',
         port: 9000,
         proxy: {
-          target: 'http://localhost:9060',
+          target: `http://localhost:${options.watch ? '7419' : '9060'}`,
+          ws: true,
         },
         socket: {
           clients: {
@@ -96,8 +45,9 @@ module.exports = webpackMerge(baseWebpackConfig, {
         } */
       },
       {
-        reload: false,
+        reload: true,
       }
-    ),
-  ],
-});
+    )
+  );
+  return devConfig;
+};

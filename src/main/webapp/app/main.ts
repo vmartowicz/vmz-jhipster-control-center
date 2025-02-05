@@ -2,6 +2,8 @@
 // (runtime-only or standalone) has been set in webpack.common with an alias.
 import Vue from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { setupAxiosInterceptors } from '@/shared/config/axios-interceptor';
+
 import App from './app.vue';
 import Vue2Filters from 'vue2-filters';
 import { ToastPlugin } from 'bootstrap-vue';
@@ -13,7 +15,9 @@ import JhiSortIndicatorComponent from './shared/sort/jhi-sort-indicator.vue';
 import InfiniteLoading from 'vue-infinite-loading';
 import LoginService from './account/login.service';
 import AccountService from './account/account.service';
+import AlertService from './shared/alert/alert.service';
 
+import '../content/scss/global.scss';
 import '../content/scss/vendor.scss';
 
 // jhcc-custom begin
@@ -60,9 +64,7 @@ const routesService = new RoutesService(store);
 router.beforeEach((to, from, next) => {
   if (!to.matched.length) {
     next('/not-found');
-  }
-
-  if (to.meta && to.meta.authorities && to.meta.authorities.length > 0) {
+  } else if (to.meta && to.meta.authorities && to.meta.authorities.length > 0) {
     accountService.hasAnyAuthorityAndCheckAuth(to.meta.authorities).then(value => {
       if (!value) {
         sessionStorage.setItem('requested-url', to.fullPath);
@@ -78,7 +80,7 @@ router.beforeEach((to, from, next) => {
 });
 
 /* tslint:disable */
-const app = new Vue({
+const vue = new Vue({
   el: '#app',
   components: { App },
   template: '<App/>',
@@ -104,7 +106,29 @@ const app = new Vue({
   store,
 });
 
+setupAxiosInterceptors(
+  error => {
+    const url = error.response?.config?.url;
+    const status = error.status || error.response.status;
+    if (status === 401) {
+      // Store logged out state.
+      store.commit('logout');
+      if (!url.endsWith('api/account') && !url.endsWith('api/authenticate')) {
+        // Ask for a new authentication
+        loginService.openLogin(vue);
+        return;
+      }
+    }
+    console.log('Unauthorized!');
+    return Promise.reject(error);
+  },
+  error => {
+    console.log('Server error!');
+    return Promise.reject(error);
+  }
+);
+
 // jhcc-custom
 if (window.Cypress) {
-  window.app = app;
+  window.app = vue;
 }

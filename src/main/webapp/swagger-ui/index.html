@@ -1,124 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>jhipsterControlCenter - Swagger UI</title>
-    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
-    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
-  </head>
+<head>
+  <meta charset="UTF-8"/>
+  <title>jhipsterControlCenter - Swagger UI</title>
+  <link rel="stylesheet" type="text/css" href="./swagger-ui.css"/>
+  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32"/>
+  <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16"/>
+</head>
 
-  <body>
-    <div id="swagger-ui"></div>
+<body>
+<div id="swagger-ui"></div>
 
-    <script src="./swagger-ui-bundle.js"></script>
-    <script src="./swagger-ui-standalone-preset.js"></script>
-    <script src="./axios.min.js"></script>
+<script src="./swagger-ui-bundle.js"></script>
+<script src="./swagger-ui-standalone-preset.js"></script>
+<script src="./axios.min.js"></script>
 
-    <script type="text/javascript">
-      function getCSRF() {
-        var name = 'XSRF-TOKEN=';
-        var ca = document.cookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-          var c = ca[i];
-          while (c.charAt(0) === ' ') c = c.substring(1);
-          if (c.indexOf(name) !== -1) return c.substring(name.length, c.length);
+<script type="text/javascript">
+  function getCSRF() {
+    var name = 'XSRF-TOKEN=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1);
+      if (c.indexOf(name) !== -1) return c.substring(name.length, c.length);
+    }
+    return '';
+  }
+  const getBearerToken = () => {
+    var authToken = localStorage.getItem('jhi-authenticationToken') || sessionStorage.getItem('jhi-authenticationToken');
+    if (authToken) {
+      return `Bearer ${authToken}`;
+    }
+    return null;
+  };
+  function createAxiosConfig(serverBaseUri) {
+    return {
+      timeout: 5000,
+      baseURL: serverBaseUri,
+      headers: { Authorization: getBearerToken() },
+    };
+  };
+
+  async function fetchJccUrls(serverBaseUri, axiosConfig, baseUrl) {
+    let urls;
+    try {
+      urls = await axios.get('/management/jhiopenapigroups', axiosConfig)
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          return response.data.map(({group, description}) => ({
+            name: description,
+            url: `${baseUrl}/${group}`,
+          }));
         }
-        return '';
-      }
+        return undefined;
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    console.log(`Swagger jcc urls`, urls);
+    return urls;
+  }
 
-      const AlwaysEnableTryItOutPlugin = function (system) {
-        const OperationContainer = system.getComponents('OperationContainer');
-        return {
-          components: {
-            TryItOutButton: () => null,
-            OperationContainer: class CustomOperationContainer extends OperationContainer {
-              constructor(...args) {
-                super(...args);
-                this.state.tryItOutEnabled = true;
-              }
-            },
-          },
-        };
-      };
-      window.onload = function () {
-        // Automatically click all 'Try it out' buttons
-        var mutationObserver = new MutationObserver(function (mutations) {
-          mutations.forEach(function (mutation) {
-            document.querySelectorAll('.btn.try-out__btn:not(.cancel)').forEach(div => {
-              div.click();
-            });
-          });
-        });
+  async function fetchUrls(serverBaseUri, axiosConfig, baseUrl, routes) {
+    let urls;
 
-        mutationObserver.observe(document.documentElement, {
-          attributes: true,
-          childList: true,
-          subtree: true,
-        });
+    try {
+      if (routes && routes.length > 0) {
 
-        var urls = [];
-        axios.get('/swagger-resources').then(function (response) {
-          response.data.forEach(function (resource) {
-            urls.push({ name: resource.name, url: resource.location });
-          });
-
-          urls.sort(function (a, b) {
-            var x = a.name.toLowerCase(),
-              y = b.name.toLowerCase();
-            return x < y ? -1 : x > y ? 1 : 0;
-          });
-
-          // Build a system
-          var ui = SwaggerUIBundle({
-            urls: urls,
-            dom_id: '#swagger-ui',
-            deepLinking: true,
-            filter: true,
-            layout: 'StandaloneLayout',
-            withCredentials: true,
-            presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-            plugins: [SwaggerUIBundle.plugins.DownloadUrl, AlwaysEnableTryItOutPlugin],
-            requestInterceptor: function (req) {
-              return axios.get('/management/info').then(function (response) {
-                var oauth2 = false;
-                response.data.activeProfiles.forEach(function (activeProfile) {
-                  if (activeProfile === 'oauth2') {
-                    oauth2 = true;
+        urls = (
+          await Promise.allSettled(
+            routes.map(async route => {
+              return axios
+                .get(`/gateway/${route.value}/management/jhiopenapigroups`, axiosConfig)
+                .then(response => {
+                  if (Array.isArray(response.data)) {
+                    return response.data.map(({ group, description }) => ({
+                      name: description,
+                      url: `/gateway/${route.value}/${baseUrl}/${group}`,
+                    }));
                   }
+                  return undefined;
+                })
+                .catch(() => {
+                  return axios
+                    .get(`/api/services/${route.value}/${baseUrl}`, axiosConfig)
+                    .then(() => [{ url: `/api/services/${route.value}/${baseUrl}`, name: `${route.value} (default)` }]);
                 });
-                // Remove the sample Swagger UI request body if present
-                if (
-                  req.method === 'GET' &&
-                  req.body === '{"additionalProp1":"string","additionalProp2":"string","additionalProp3":"string"}'
-                ) {
-                  req.body = undefined;
-                }
-                if (oauth2) {
-                  // OAuth2
-                  req.headers['X-XSRF-TOKEN'] = getCSRF();
-                } else {
-                  // working only with JWT authentication
-                  var authToken = localStorage.getItem('jhi-authenticationToken') || sessionStorage.getItem('jhi-authenticationToken');
-                  if (authToken) {
-                    req.headers['Authorization'] = 'Bearer ' + authToken;
-                  }
-                  // Remove the sample Swagger UI request body if present
-                  if (
-                    req.method === 'GET' &&
-                    req.body === '{"additionalProp1":"string","additionalProp2":"string","additionalProp3":"string"}'
-                  ) {
-                    req.body = undefined;
-                  }
-                }
-                return req;
-              });
-            },
-          });
+            }),
+          )
+        )
+          .filter(settled => settled.status === 'fulfilled')
+          .map(settled => settled.value)
+          .filter(Array.isArray)
+          .flat();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    console.log(`Swagger service urls`, urls);
 
-          window.ui = ui;
+    return urls;
+  }
+
+  async function fetchRoutes(serverBaseUri, axiosConfig, baseUrl) {
+    let routeIds;
+
+    try {
+      const response = await axios.get('/management/gateway/routes', axiosConfig);
+      const routes = response.data;
+      console.log(`Routes`, routes);
+      if (routes && routes.length > 0) {
+        routeIds = (
+          await Promise.allSettled(
+            routes.map(route => {
+              return route.route_id
+            })
+          )
+        )
+          routesIds = routeIds.filter(settled => settled.status === 'fulfilled');
+          routesIds = routeIds.map(settled => settled.value)
+          routesIds = routeIds.filter(Array.isArray)
+          routesIds = routeIds.flat();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    console.log(`Swagger routes`, routeIds);
+    return routeIds;
+  }
+
+  function sortUrls(urls) {
+    if (!urls) return urls;
+
+    urls.sort((a, b) => compareUrls(a.name.toLowerCase(), b.name.toLowerCase()));
+
+    return urls;
+  }
+
+  function compareUrls(nameA, nameB) {
+    if (nameA.includes('(default)')) return -1;
+    if (nameB.includes('(default)')) return 1;
+    if (nameA.includes('(management)')) return -1;
+    if (nameB.includes('(management)')) return 1;
+    return nameA.localeCompare(nameB);
+  }
+
+  const AlwaysEnableTryItOutPlugin = function (system) {
+    const OperationContainer = system.getComponents('OperationContainer');
+    return {
+      components: {
+        TryItOutButton: () => null,
+        OperationContainer: class CustomOperationContainer extends OperationContainer {
+          constructor(...args) {
+            super(...args);
+            //   this.state.tryItOutEnabled = true;
+          }
+        },
+      },
+    };
+  };
+
+  function initializeSwaggerUI(urls, baseUrl) {
+    // Build a system
+    const ui = SwaggerUIBundle({
+      urls: urls,
+      url: baseUrl,
+      dom_id: '#swagger-ui',
+      deepLinking: true,
+      filter: true,
+      layout: 'StandaloneLayout',
+      withCredentials: true,
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+      plugins: [SwaggerUIBundle.plugins.DownloadUrl, AlwaysEnableTryItOutPlugin],
+      requestInterceptor: function (req) {
+        return axios.get('/management/info').then(function (response) {
+          var oauth2 = false;
+          response.data.activeProfiles.forEach(function (activeProfile) {
+            if (activeProfile === 'oauth2') {
+              oauth2 = true;
+            }
+          });
+          // Remove the sample Swagger UI request body if present
+          if (
+            req.method === 'GET' &&
+            req.body === '{"additionalProp1":"string","additionalProp2":"string","additionalProp3":"string"}'
+          ) {
+            req.body = undefined;
+          }
+          if (oauth2) {
+            // OAuth2
+            req.headers['X-XSRF-TOKEN'] = getCSRF();
+          } else {
+            // working only with JWT authentication
+            var authToken = localStorage.getItem('jhi-authenticationToken') || sessionStorage.getItem('jhi-authenticationToken');
+            if (authToken) {
+              req.headers['Authorization'] = 'Bearer ' + authToken;
+            }
+            // Remove the sample Swagger UI request body if present
+            if (
+              req.method === 'GET' &&
+              req.body === '{"additionalProp1":"string","additionalProp2":"string","additionalProp3":"string"}'
+            ) {
+              req.body = undefined;
+            }
+          }
+          return req;
         });
-      };
-    </script>
-  </body>
+      },
+    });
+
+    window.ui = ui;
+  }
+
+  window.onload = async function () {
+    const baseUrl = '/v3/api-docs';
+    const serverBaseUri = document.baseURI.replace('swagger-ui/', '');
+    const axiosConfig = createAxiosConfig(''/*serverBaseUri*/);
+    const routes = await fetchRoutes(''/*serverBaseUri*/, axiosConfig, baseUrl);
+    const servicesUrls = await fetchUrls(''/*serverBaseUri*/, axiosConfig, baseUrl, routes);
+    const jccUrls = await fetchJccUrls(''/*serverBaseUri*/, axiosConfig, baseUrl);
+    const sortedUrls = sortUrls([...servicesUrls, ...jccUrls]);
+
+    initializeSwaggerUI(sortedUrls, baseUrl);
+  };
+</script>
+</body>
 </html>

@@ -1,40 +1,35 @@
 'use strict';
-const utils = require('./vue.utils');
 const webpack = require('webpack');
-const config = require('../config');
-const webpackMerge = require('webpack-merge').merge;
-const baseWebpackConfig = require('./webpack.common');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const jhiUtils = require('./utils.js');
 
-const env = require('../config/prod.env');
+const { styleLoaders } = require('./vue.utils');
+const config = require('./config');
 
-const webpackConfig = webpackMerge(baseWebpackConfig, {
-  mode: 'production',
+const webpackConfig = {
   module: {
-    rules: utils.styleLoaders({
+    rules: styleLoaders({
       sourceMap: config.build.productionSourceMap,
       extract: true,
       usePostCSS: true,
     }),
   },
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
-  entry: {
-    global: './src/main/webapp/content/scss/global.scss',
-    main: './src/main/webapp/app/main',
-  },
   output: {
-    path: jhiUtils.root('target/classes/static/'),
-    filename: 'app/[name].[hash].bundle.js',
-    chunkFilename: 'app/[id].[hash].chunk.js',
+    filename: 'app/[name].[contenthash].bundle.js',
+    chunkFilename: 'app/[id].[chunkhash].chunk.js',
   },
   optimization: {
     moduleIds: 'deterministic',
+    minimizer: [
+      '...',
+      new CssMinimizerPlugin({
+        parallel: true,
+      }),
+    ],
     splitChunks: {
       cacheGroups: {
         commons: {
@@ -46,10 +41,6 @@ const webpackConfig = webpackMerge(baseWebpackConfig, {
     },
   },
   plugins: [
-    // http://vuejs.github.io/vue-loader/en/workflow/production.html
-    new webpack.DefinePlugin({
-      'process.env': env,
-    }),
     new TerserPlugin({
       terserOptions: {
         compress: {
@@ -89,26 +80,6 @@ const webpackConfig = webpackMerge(baseWebpackConfig, {
       filename: 'content/[name].[contenthash].css',
       chunkFilename: 'content/[id].css',
     }),
-    // Compress extracted CSS. We are using this plugin so that possible
-    // duplicated CSS from different components can be deduped.
-    new OptimizeCSSPlugin({}),
-    // generate dist index.html with correct asset hash for caching.
-    // you can customize output by editing /index.html
-    // see https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      base: '/',
-      template: './src/main/webapp/index.html',
-      chunks: ['vendors', 'main', 'global'],
-      chunksSortMode: 'manual',
-      inject: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        // more options:
-        // https://github.com/kangax/html-minifier#options-quick-reference
-      },
-    }),
     // keep module.id stable when vendor modules does not change
     new ForkTsCheckerWebpackPlugin({
       typescript: {
@@ -129,7 +100,7 @@ const webpackConfig = webpackMerge(baseWebpackConfig, {
       exclude: [/swagger-ui/],
     }),
   ],
-});
+};
 
 if (config.build.productionGzip) {
   const CompressionWebpackPlugin = require('compression-webpack-plugin');
@@ -150,4 +121,4 @@ if (config.build.bundleAnalyzerReport) {
   webpackConfig.plugins.push(new BundleAnalyzerPlugin());
 }
 
-module.exports = webpackConfig;
+module.exports = async () => webpackConfig;

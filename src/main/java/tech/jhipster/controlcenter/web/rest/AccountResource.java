@@ -2,10 +2,10 @@ package tech.jhipster.controlcenter.web.rest;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.security.Principal;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,11 +13,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api")
 public class AccountResource {
+
+    private final Logger log = LoggerFactory.getLogger(AccountResource.class);
 
     private static class AccountResourceException extends RuntimeException {}
 
@@ -34,23 +37,34 @@ public class AccountResource {
             .map(SecurityContext::getAuthentication)
             .map(
                 authentication -> {
-                    String login;
-                    if (authentication.getPrincipal() instanceof UserDetails) {
-                        login = ((UserDetails) authentication.getPrincipal()).getUsername();
-                    } else if (authentication.getPrincipal() instanceof String) {
-                        login = (String) authentication.getPrincipal();
-                    } else {
-                        throw new AccountResourceException();
-                    }
-                    Set<String> authorities = authentication
-                        .getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toSet());
-                    return new UserVM(login, authorities);
+                String login;
+                if (authentication.getPrincipal() instanceof UserDetails) {
+                    login = ((UserDetails) authentication.getPrincipal()).getUsername();
+                } else if (authentication.getPrincipal() instanceof String) {
+                    login = (String) authentication.getPrincipal();
+                } else {
+                    throw new AccountResourceException();
                 }
-            )
+                Set<String> authorities = authentication
+                    .getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
+                return new UserVM(login, authorities);
+            })
             .switchIfEmpty(Mono.error(new AccountResourceException()));
+    }
+
+    /**
+     * {@code GET  /authenticate} : check if the user is authenticated, and return its login.
+     *
+     * @param request the HTTP request.
+     * @return the login if the user is authenticated.
+     */
+    @GetMapping("/authenticate")
+    public Mono<String> isAuthenticated(ServerWebExchange request) {
+        log.debug("REST request to check if the current user is authenticated");
+        return request.getPrincipal().map(Principal::getName);
     }
 
     private static class UserVM {

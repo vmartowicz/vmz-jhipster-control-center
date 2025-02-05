@@ -14,6 +14,16 @@
 # http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
 
+---
+# Conditionally disable springdoc on missing api-docs profile
+spring:
+  config:
+    activate:
+      on-profile: '!api-docs'
+springdoc:
+  api-docs:
+    enabled: false
+---
 management:
   endpoints:
     web:
@@ -27,6 +37,7 @@ management:
             'health',
             'info',
             'jhimetrics',
+            'jhiopenapigroups',
             'logfile',
             'loggers',
             'prometheus',
@@ -42,17 +53,19 @@ management:
       roles: 'ROLE_ADMIN'
       probes:
         enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState
     jhimetrics:
       enabled: true
   info:
     git:
       mode: full
+    env:
+      enabled: true
   health:
-    group:
-      liveness:
-        include: livenessState
-      readiness:
-        include: readinessState
     mail:
       enabled: false # When using the MailService, configure an SMTP server and set this to true
   metrics:
@@ -148,6 +161,9 @@ server:
       cookie:
         http-only: true
 
+springdoc:
+  show-actuator: true
+
 # Properties to be exposed on the /info management endpoint
 info:
   # Comma separated list of profiles that will trigger the ribbon to show
@@ -173,10 +189,10 @@ jhipster:
   mail:
     from: jhipsterControlCenter@localhost
   api-docs:
-    default-include-pattern: /api/.*
-    #management-include-pattern: ${server.servlet.context-path:}/management/.*
-    title: jhipsterControlCenter API
-    description: jhipsterControlCenter API documentation
+    default-include-pattern: ${server.servlet.context-path:}/api/**
+    management-include-pattern: ${server.servlet.context-path:}/management/**
+    title: Jhipster Control Center API
+    description: Jhipster Control Center API documentation
     version: 0.0.1
     terms-of-service-url:
     contact-name:

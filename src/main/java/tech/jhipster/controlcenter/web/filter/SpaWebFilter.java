@@ -1,12 +1,10 @@
 package tech.jhipster.controlcenter.web.filter;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-@Component
 public class SpaWebFilter implements WebFilter {
 
     /**
@@ -19,8 +17,6 @@ public class SpaWebFilter implements WebFilter {
             !path.startsWith("/api") &&
             !path.startsWith("/management") &&
             !path.startsWith("/services") &&
-            !path.startsWith("/swagger") &&
-            !path.startsWith("/v2/api-docs") &&
             !path.startsWith("/v3/api-docs") &&
             // jhcc-custom
             !path.startsWith("/login") &&
