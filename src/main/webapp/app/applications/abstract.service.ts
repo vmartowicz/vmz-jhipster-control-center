@@ -1,5 +1,4 @@
 import { Route } from '@/shared/routes/routes.service';
-import { SERVER_API_URL } from '@/constants';
 
 export default abstract class AbstractService {
   private GATEWAY_PATH = 'gateway/';

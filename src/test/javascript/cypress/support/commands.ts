@@ -76,20 +76,50 @@ export const configurationPageHeadingSelector = '[data-cy="configurationPageHead
 
 export const classInvalid = 'invalid';
 export const classValid = 'valid';
+Cypress.Commands.add('authenticatedRequest', data => {
+  const bearerToken = sessionStorage.getItem(Cypress.env('jwtStorageName'));
+  return cy.request({
+    ...data,
+    auth: {
+      bearer: bearerToken,
+    },
+  });
+});
+
 Cypress.Commands.add('login', (username: string, password: string) => {
-  cy.clickOnLoginItem();
-  cy.get(usernameLoginSelector).type(username);
-  cy.get(passwordLoginSelector).type(password);
-  cy.get(submitLoginSelector).click();
+  cy.session(
+    [username, password],
+    () => {
+      cy.request({
+        method: 'GET',
+        url: '/api/account',
+        failOnStatusCode: false,
+      });
+      cy.authenticatedRequest({
+        method: 'POST',
+        body: { username, password },
+        url: Cypress.env('authenticationUrl'),
+      }).then(({ body: { id_token } }) => {
+        sessionStorage.setItem(Cypress.env('jwtStorageName'), id_token);
+      });
+    },
+    {
+      validate() {
+        cy.authenticatedRequest({ url: '/api/account' }).its('status').should('eq', 200);
+      },
+    }
+  );
 });
 
 declare global {
   namespace Cypress {
-    interface Chainable<Subject> {
+    interface Chainable {
+      authenticatedRequest(data): Cypress.Chainable;
       login(username: string, password: string): Cypress.Chainable;
     }
   }
 }
 
+import 'cypress-audit/commands';
 // Convert this to a module instead of script (allows import/export)
 export {};

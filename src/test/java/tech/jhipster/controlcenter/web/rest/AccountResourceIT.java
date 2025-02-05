@@ -14,7 +14,7 @@ import tech.jhipster.controlcenter.security.AuthoritiesConstants;
 /**
  * Integration tests for the {@link AccountResource} REST controller.
  */
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_TIMEOUT)
 @WithMockUser(value = TEST_USER_LOGIN)
 @IntegrationTest
 class AccountResourceIT {
@@ -41,5 +41,32 @@ class AccountResourceIT {
             .isEqualTo(TEST_USER_LOGIN)
             .jsonPath("$.authorities")
             .isEqualTo(AuthoritiesConstants.ADMIN);
+    }
+
+    @Test
+    @WithUnauthenticatedMockUser
+    void testNonAuthenticatedUser() {
+        accountWebTestClient
+            .get()
+            .uri("/api/authenticate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .isEmpty();
+    }
+
+    @Test
+    void testAuthenticatedUser() {
+        accountWebTestClient
+            .get()
+            .uri("/api/authenticate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .isEqualTo(TEST_USER_LOGIN);
     }
 }

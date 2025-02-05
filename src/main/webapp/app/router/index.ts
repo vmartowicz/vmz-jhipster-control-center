@@ -5,8 +5,9 @@ Component.registerHooks([
   'beforeRouteLeave',
   'beforeRouteUpdate', // for vue-router 2.2+
 ]);
-import Router from 'vue-router';
+import Router, { RouteConfig } from 'vue-router';
 import { Authority } from '@/shared/security/authority';
+
 const Home = () => import('@/core/home/home.vue');
 const Error = () => import('@/core/error/error.vue');
 import entities from '@/router/entities';
@@ -27,7 +28,7 @@ const LiquibaseComponent = () => import('../applications/liquibase/liquibase.vue
 Vue.use(Router);
 
 // prettier-ignore
-export default new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {
@@ -106,3 +107,5 @@ export default new Router({
     },
   ]
 });
+
+export default router;

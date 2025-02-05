@@ -11,5 +11,7 @@ public class JHipsterBlockHoundIntegration implements BlockHoundIntegration {
         builder.allowBlockingCallsInside("reactor.core.scheduler.BoundedElasticScheduler$BoundedState", "dispose");
         builder.allowBlockingCallsInside("reactor.core.scheduler.BoundedElasticScheduler", "schedule");
         builder.allowBlockingCallsInside("org.springframework.validation.beanvalidation.SpringValidatorAdapter", "validate");
+        builder.allowBlockingCallsInside("tech.jhipster.controlcenter.service.MailService", "sendEmailFromTemplate");
+        builder.allowBlockingCallsInside("tech.jhipster.controlcenter.security.DomainUserDetailsService", "createSpringSecurityUser");
     }
 }
