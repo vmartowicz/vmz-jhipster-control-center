@@ -25,8 +25,8 @@
         <!-- Build properties -->
         <maven.version>3.2.5</maven.version>
         <java.version>11</java.version>
-        <node.version>v16.16.0</node.version>
-        <npm.version>8.15.1</npm.version>
+        <node.version>v16.17.0</node.version>
+        <npm.version>8.19.1</npm.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -43,19 +43,19 @@
         <profile.e2e />
 
         <!-- Dependency versions -->
-        <jhipster-dependencies.version>7.9.0</jhipster-dependencies.version>
+        <jhipster-dependencies.version>7.9.3</jhipster-dependencies.version>
         <!-- The spring-boot version should match the one managed by
         https://mvnrepository.com/artifact/tech.jhipster/jhipster-dependencies/${jhipster-dependencies.version} -->
-        <spring-boot.version>2.7.2</spring-boot.version>
+        <spring-boot.version>2.7.3</spring-boot.version>
         <blockhound-junit-platform.version>1.0.6.RELEASE</blockhound-junit-platform.version>
         <archunit-junit5.version>0.22.0</archunit-junit5.version>
         <mapstruct.version>1.5.2.Final</mapstruct.version>
         <oauth2-client.version>2.3.1.RELEASE</oauth2-client.version>
         <!-- Plugin versions -->
         <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-        <maven-site-plugin.version>3.12.0</maven-site-plugin.version>
+        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
         <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
         <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
@@ -65,7 +65,7 @@
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-        <checkstyle.version>10.3.1</checkstyle.version>
+        <checkstyle.version>10.3.2</checkstyle.version>
         <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
         <checksum-maven-plugin.version>1.11</checksum-maven-plugin.version>
@@ -123,21 +123,6 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-webflux-core</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-oas</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-bean-validators</artifactId>
-            <version>3.0.0</version>
-        </dependency-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -742,9 +727,8 @@
                         <fork>true</fork>
                         <!--
                         Enable the line below to have remote debugging of your application on port 5005
-
-                        -->
                         <jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
+                        -->
                     </configuration>
 
                 </plugin>

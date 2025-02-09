@@ -35,8 +35,7 @@ public class AccountResource {
         return ReactiveSecurityContextHolder
             .getContext()
             .map(SecurityContext::getAuthentication)
-            .map(
-                authentication -> {
+            .map(authentication -> {
                 String login;
                 if (authentication.getPrincipal() instanceof UserDetails) {
                     login = ((UserDetails) authentication.getPrincipal()).getUsername();

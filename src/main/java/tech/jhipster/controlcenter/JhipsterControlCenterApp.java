@@ -16,6 +16,7 @@ import org.springframework.core.env.Environment;
 import tech.jhipster.config.DefaultProfileUtil;
 import tech.jhipster.config.JHipsterConstants;
 import tech.jhipster.controlcenter.config.ApplicationProperties;
+import tech.jhipster.controlcenter.config.CRLFLogConverter;
 
 @SpringBootApplication
 @EnableConfigurationProperties({ ApplicationProperties.class })
@@ -83,6 +84,7 @@ public class JhipsterControlCenterApp {
             log.warn("The host name could not be determined, using `localhost` as fallback");
         }
         log.info(
+            CRLFLogConverter.CRLF_SAFE_MARKER,
             "\n----------------------------------------------------------\n\t" +
             "Application '{}' is running! Access URLs:\n\t" +
             "Local: \t\t{}://localhost:{}{}\n\t" +

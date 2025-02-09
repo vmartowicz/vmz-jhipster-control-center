@@ -22,16 +22,6 @@ export default class JhiNavbar extends Vue {
     });
   }
 
-  /*public logout_(): Promise<any> {
-    localStorage.removeItem('jhi-authenticationToken');
-    sessionStorage.removeItem('jhi-authenticationToken');
-    this.$store.commit('logout');
-    if (this.$route.path !== '/') {
-      return this.$router.push('/');
-    }
-    return Promise.resolve(this.$router.currentRoute);
-  }*/
-
   // jhcc-custom
   public logout(): Promise<any> {
     if (this.$store.getters.activeProfiles.includes('oauth2')) {

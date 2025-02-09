@@ -1,60 +1,6 @@
 # jhipsterControlCenter
 
-This application was generated using JHipster 7.9.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.9.0](https://www.jhipster.tech/documentation-archive/v7.9.0).
-
-## JHipster Control Center
-
-[![Application CI][github-application-ci]][github-actions] [![Docker Pulls][docker-hub-pulls]][docker-hub-url]
-
-[![sonar-quality-gate][sonar-quality-gate]][sonar-url] [![sonar-coverage][sonar-coverage]][sonar-url] [![sonar-bugs][sonar-bugs]][sonar-url] [![sonar-vulnerabilities][sonar-vulnerabilities]][sonar-url]
-
-### Specific Spring profiles
-
-In order to work properly, the Control Center has to be started with a spring profile corresponding to a Spring Cloud discovery backend
-
-- `eureka`: Connect to an Eureka server and fetch its registered instances, configured in `application-eureka.yml`
-- `consul`: Connect to a Consul server and fetch its registered instances, configured in `application-consul.yml`
-- `static`: Uses a static list of instances provided as properties, configured in `application-static.yml`
-- `kubernetes`: To be developed
-
-### Control Center API
-
-- `localhost:7419/api/services/instances`: get registered instances
-- `localhost:7419/management/gateway/routes`: get Spring Cloud Gateway routes
-- `localhost:7419/gateway/<serviceName>/<instanceName>/<urlPath>`: proxy request to `instanceName`'s urlPath.
-  For example, when using Eureka, it would look like: `localhost:7419/gateway/eurekaservice1/eurekaservice1:3d38fb89771e502111b495064d739ef8/management/info`
-
-## Running locally
-
-### Step 1 : Run server used by Spring Cloud discovery backend
-
-Eureka and Consul docker-compose files exist under `src/main/docker` to ease testing the project.
-
-- for Consul : run `docker-compose -f src/main/docker/consul.yml up -d`
-- for Eureka : run `docker-compose -f src/main/docker/jhipster-registry.yml up -d`
-- Otherwise, to use a static list of instances, you can directly go to the next step.
-
-### Step 2 : Choose your authentication profile
-
-There is 2 types of authentication.
-
-- JWT : This is the default authentication, if you choose this one, you have to do nothing.
-- OAuth2 : To use OAuth2 authentication, you have to launch Keycloak. Run `docker-compose -f src/main/docker/keycloak.yml up -d`
-
-### Step 3 : Run the cloned project
-
-Run the Control Center according to the specific spring profiles you want, here are some examples:
-
-- For development with JWT and Consul, run ./mvnw -Dspring.profiles.active=consul,dev
-- For development with JWT and Eureka, run./mvnw -Dspring.profiles.active=eureka,dev
-- For development with JWT and a static list of instances, run ./mvnw -Dspring.profiles.active=static,dev
-- For development with OAuth2 and Consul, run ./mvnw -Dspring.profiles.active=consul,dev,oauth2
-- For development with OAuth2 and Eureka, run ./mvnw -Dspring.profiles.active=eureka,dev,oauth2
-- To just start in development run ./mvnw and in another terminal run npm start for hot reload of client side code
-
-## Running from Docker
-
-A container image has been made available on Docker hub.To use it, run `docker pull jhipster/jhipster-control-center` and `docker run -d --name jhcc -p 7419:7419 jhipster/jhipster-control-center:latest`
+This application was generated using JHipster 7.9.4, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v7.9.4](https://www.jhipster.tech/documentation-archive/v7.9.4).
 
 ## Project Structure
 
@@ -140,6 +86,14 @@ Then you would import the JS and CSS files specified in library's installation i
 Note: There are still a few other things remaining to do for Leaflet that we won't detail here.
 
 For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
+
+### JHipster Control Center
+
+JHipster Control Center can help you manage and control your application(s). You can start a local control center server (accessible on http://localhost:7419) with:
+
+```
+docker-compose -f src/main/docker/jhipster-control-center.yml up
+```
 
 ## Building for production
 
@@ -255,13 +209,13 @@ For more information refer to [Using Docker and Docker-Compose][], this page als
 To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration][] page for more information.
 
 [jhipster homepage and latest documentation]: https://www.jhipster.tech
-[jhipster 7.9.0 archive]: https://www.jhipster.tech/documentation-archive/v7.9.0
-[using jhipster in development]: https://www.jhipster.tech/documentation-archive/v7.9.0/development/
-[using docker and docker-compose]: https://www.jhipster.tech/documentation-archive/v7.9.0/docker-compose
-[using jhipster in production]: https://www.jhipster.tech/documentation-archive/v7.9.0/production/
-[running tests page]: https://www.jhipster.tech/documentation-archive/v7.9.0/running-tests/
-[code quality page]: https://www.jhipster.tech/documentation-archive/v7.9.0/code-quality/
-[setting up continuous integration]: https://www.jhipster.tech/documentation-archive/v7.9.0/setting-up-ci/
+[jhipster 7.9.4 archive]: https://www.jhipster.tech/documentation-archive/v7.9.4
+[using jhipster in development]: https://www.jhipster.tech/documentation-archive/v7.9.4/development/
+[using docker and docker-compose]: https://www.jhipster.tech/documentation-archive/v7.9.4/docker-compose
+[using jhipster in production]: https://www.jhipster.tech/documentation-archive/v7.9.4/production/
+[running tests page]: https://www.jhipster.tech/documentation-archive/v7.9.4/running-tests/
+[code quality page]: https://www.jhipster.tech/documentation-archive/v7.9.4/code-quality/
+[setting up continuous integration]: https://www.jhipster.tech/documentation-archive/v7.9.4/setting-up-ci/
 [node.js]: https://nodejs.org/
 [npm]: https://www.npmjs.com/
 [webpack]: https://webpack.github.io/
@@ -270,7 +224,3 @@ To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`)
 [cypress]: https://www.cypress.io/
 [leaflet]: https://leafletjs.com/
 [definitelytyped]: https://definitelytyped.org/
-
-https://medium.com/@pubuduc.14/swagger-openapi-specification-3-integration-with-spring-cloud-gateway-part-2-1d670d4ab69a
-https://springdoc.org/index.html#demos
-https://github.com/springdoc/springdoc-openapi-demos/tree/master

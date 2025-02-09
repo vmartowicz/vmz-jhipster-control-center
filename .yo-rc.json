@@ -21,7 +21,7 @@
     "enableTranslation": false,
     "entitySuffix": "",
     "jhiPrefix": "jhi",
-    "jhipsterVersion": "7.9.0",
+    "jhipsterVersion": "7.9.4",
     "jwtSecretKey": "MDc2YTJkMGVmMTc3ZjQ3MjgwNjVkMDRhYmE1MThmZmNlZGMyMjgzNjgxMTMyZGY3MzlhOTA1Mjk1NzUwODgyOTZhODM1ZTYyZmI5YmJjZWVkNjVhZWM5NDgzMzU2OWZkYzUzNjVkYTNiMTIxZTlhMWRkYjJhMTg2ZWJmMzgxMjQ=",
     "languages": ["en"],
     "messageBroker": false,
